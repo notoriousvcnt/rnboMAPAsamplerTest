@@ -356,13 +356,13 @@ function makeMIDIKeyboard(device) {
 async function loadSamples(context, device,samples,normalizeFactor){
     for (let id in samples){
         const url = samples[id];
-        await loadSample(url,id,device);
+        await loadSample(context,url,id,device);
     }
     //enableButtons();
     sendMessageToInport(normalizeFactor,"normalizeSampleBuffer");
 }
 
-async function loadSample(context, url,id,device){
+async function loadSample(context,url,id,device){
     //load audio to buffer
    const fileResponse = await fetch(url);
    const arrayBuf = await fileResponse.arrayBuffer();
