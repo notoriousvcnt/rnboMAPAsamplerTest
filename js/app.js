@@ -46,15 +46,15 @@ async function setup() {
         return;
     }
     
-    // (Optional) Fetch the dependencies
-    let dependencies = [];
-    try {
-        const dependenciesResponse = await fetch("export/dependencies.json");
-        dependencies = await dependenciesResponse.json();
+    // // (Optional) Fetch the dependencies
+    // let dependencies = [];
+    // try {
+    //     const dependenciesResponse = await fetch("export/dependencies.json");
+    //     dependencies = await dependenciesResponse.json();
 
-        // Prepend "export" to any file dependenciies
-        dependencies = dependencies.map(d => d.file ? Object.assign({}, d, { file: "export/" + d.file }) : d);
-    } catch (e) {}
+    //     // Prepend "export" to any file dependenciies
+    //     dependencies = dependencies.map(d => d.file ? Object.assign({}, d, { file: "export/" + d.file }) : d);
+    // } catch (e) {}
 
     // Create the device
     let device;
@@ -73,8 +73,8 @@ async function setup() {
     
 
     // (Optional) Load the samples
-    if (dependencies.length)
-        await device.loadDataBufferDependencies(dependencies);
+    // if (dependencies.length)
+    //     await device.loadDataBufferDependencies(dependencies);
     
     
     // Connect the device to the web audio graph
@@ -99,10 +99,10 @@ async function setup() {
     attachOutports(device);
 
     // (Optional) Load presets, if any
-    loadPresets(device, patcher);
+    //loadPresets(device, patcher);
 
     // (Optional) Connect MIDI inputs
-    makeMIDIKeyboard(device);
+    //makeMIDIKeyboard(device);
 
     document.body.onclick = () => {
         context.resume();
