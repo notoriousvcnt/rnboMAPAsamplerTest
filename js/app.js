@@ -1,5 +1,8 @@
+const SAMPLES_2961 = {"sampleSilbatoGrave": "media/audio/2961/2961_largo_suave_grave.wav","sampleSilbatoAgudo": "media/audio/2961/2961_largo_suave_agudo.wav"};
+const sustainLoopPoints = {"grave": [269.5,4930], "agudo": [298.1, 2889]};
+
 async function setup() {
-    const patchExportURL = "export/patch.export.json";
+    const patchExportURL = "export/sampler.export.json";
 
     // Create AudioContext
     const WAContext = window.AudioContext || window.webkitAudioContext;
@@ -9,6 +12,8 @@ async function setup() {
     const outputNode = context.createGain();
     outputNode.connect(context.destination);
     
+    
+
     // Fetch the exported patcher
     let response, patcher;
     try {
@@ -55,6 +60,7 @@ async function setup() {
     let device;
     try {
         device = await RNBO.createDevice({ context, patcher });
+        
     } catch (err) {
         if (typeof guardrails === "function") {
             guardrails({ error: err });
@@ -64,12 +70,21 @@ async function setup() {
         return;
     }
 
+    
+
     // (Optional) Load the samples
     if (dependencies.length)
         await device.loadDataBufferDependencies(dependencies);
-
+    
+    
     // Connect the device to the web audio graph
     device.node.connect(outputNode);
+
+    // Connect web microphone to RNBO device
+    connectMicrophone(device);
+    // Load samples from url
+    loadSamples(device,SAMPLES_2961,0.7);
+    loadSustainLoopPoints(device);
 
     // (Optional) Extract the name and rnbo version of the patcher from the description
     document.getElementById("patcher-title").innerText = (patcher.desc.meta.filename || "Unnamed Patcher") + " (v" + patcher.desc.meta.rnboversion + ")";
@@ -334,6 +349,58 @@ function makeMIDIKeyboard(device) {
 
         mdiv.appendChild(key);
     });
+}
+
+// User-made functions
+//RNBO Functions
+async function loadSamples(device,samples,normalizeFactor){
+    for (let id in samples){
+        const url = samples[id];
+        await loadSample(url,id,device);
+    }
+    //enableButtons();
+    sendMessageToInport(normalizeFactor,"normalizeSampleBuffer");
+}
+
+async function loadSample(url,id,device){
+    //load audio to buffer
+   const fileResponse = await fetch(url);
+   const arrayBuf = await fileResponse.arrayBuffer();
+
+   //decode audio
+   const audioBuf = await context.decodeAudioData(arrayBuf);
+   await device.setDataBuffer(id,audioBuf);
+}
+
+function connectMicrophone(device){
+    // Assuming you have a RNBO device already, and an audio context as well
+    const handleSuccess = (stream) => {
+        const source = context.createMediaStreamSource(stream);
+        source.connect(device.node);
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        .then(handleSuccess);
+}
+
+function sendMessageToInport(message,inportTag){
+    const event = new MessageEvent(TimeNow, inportTag, [message]);
+    device.scheduleEvent(event);
+}
+
+function loadSustainLoopPoints(device){
+    const lowStart = device.parametersById.get("initSustainGrave");
+    lowStart.value = sustainLoopPoints["grave"][0];
+    console.log(lowStart.value);
+
+    const lowEnd = device.parametersById.get("endSustainGrave");
+    lowEnd.value = sustainLoopPoints["grave"][1];
+
+    const highStart = device.parametersById.get("initSustainAgudo");
+    highStart.value = sustainLoopPoints["agudo"][0];
+
+    const highEnd = device.parametersById.get("endSustainAgudo");
+    highEnd.value = sustainLoopPoints["agudo"][1];
+
 }
 
 setup();
