@@ -83,7 +83,7 @@ async function setup() {
     // Connect web microphone to RNBO device
     connectMicrophone(device);
     // Load samples from url
-    loadSamples(device,SAMPLES_2961,0.7);
+    loadSamples(context, device,SAMPLES_2961,0.7);
     loadSustainLoopPoints(device);
 
     // (Optional) Extract the name and rnbo version of the patcher from the description
@@ -353,7 +353,7 @@ function makeMIDIKeyboard(device) {
 
 // User-made functions
 //RNBO Functions
-async function loadSamples(device,samples,normalizeFactor){
+async function loadSamples(context, device,samples,normalizeFactor){
     for (let id in samples){
         const url = samples[id];
         await loadSample(url,id,device);
@@ -362,7 +362,7 @@ async function loadSamples(device,samples,normalizeFactor){
     sendMessageToInport(normalizeFactor,"normalizeSampleBuffer");
 }
 
-async function loadSample(url,id,device){
+async function loadSample(context, url,id,device){
     //load audio to buffer
    const fileResponse = await fetch(url);
    const arrayBuf = await fileResponse.arrayBuffer();
