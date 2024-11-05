@@ -81,7 +81,7 @@ async function setup() {
     device.node.connect(outputNode);
 
     // Connect web microphone to RNBO device
-    connectMicrophone(device);
+    connectMicrophone(context, device);
     // Load samples from url
     loadSamples(context, device,SAMPLES_2961,0.7);
     loadSustainLoopPoints(device);
@@ -372,7 +372,7 @@ async function loadSample(context, url,id,device){
    await device.setDataBuffer(id,audioBuf);
 }
 
-function connectMicrophone(device){
+function connectMicrophone(context, device){
     // Assuming you have a RNBO device already, and an audio context as well
     const handleSuccess = (stream) => {
         const source = context.createMediaStreamSource(stream);
